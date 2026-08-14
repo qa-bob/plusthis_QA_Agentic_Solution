@@ -149,3 +149,12 @@ tests/
 - Put assertions inside page object methods
 - Use `page.waitForTimeout()` — use `waitForSelector` or Playwright auto-waiting instead
 - Use `any` type without explicit justification
+
+---
+
+## Related Docs
+
+- [`README.md`](./README.md) — repo purpose, environment setup, contributor rules
+- [`AGENTS.md`](./AGENTS.md) — catalog of `.claude/agents/` subagents
+- [`SKILLS.md`](./SKILLS.md) — catalog of `.claude/commands/` and guidance for `.claude/skills/`
+- [`.github/README.md`](./.github/README.md) — what lives in `.github/` vs `.claude/`

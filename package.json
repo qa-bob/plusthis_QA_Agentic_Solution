@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Shared Playwright + TypeScript regression framework for qa-bob company sites",
   "scripts": {
+    "pretest": "bash .claude/hooks/pre-test.sh",
     "test": "playwright test",
     "test:smoke": "playwright test --grep @smoke",
     "test:navigation": "playwright test --grep @navigation",

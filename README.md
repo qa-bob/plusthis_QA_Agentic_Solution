@@ -1,83 +1,102 @@
-# PlusThis — QA Agentic Solution
+# PlusThis QA Agentic Solution
 
-> Automated QA framework for [PlusThis](http://www.plusthis.com/) built with Playwright + TypeScript.
+Automated GUI, functional, and regression test suite for the [PlusThis](http://www.plusthis.com/) marketing website, built with **Playwright + TypeScript** using the **Page Object Model (POM)** pattern and **OOP** principles. The suite is structured for agentic execution by [Claude Code](https://code.claude.com/docs/) — see the docs map at the bottom of this file.
 
----
+## Purpose
 
-## 🏢 Company Profile
+This repo tests **one B2B SaaS website** (defined in [`site.config.json`](./site.config.json)) end-to-end without ever creating an account, logging in, or submitting a real form. Coverage spans:
 
-| Field | Details |
-|-------|---------|
-| **Company** | PlusThis |
-| **Description** | Productivity add-on software for Infusionsoft |
-| **Website** | [http://www.plusthis.com/](http://www.plusthis.com/) |
-| **LinkedIn** | [View Profile](https://www.linkedin.com/company/plusthis/) |
-| **City** | Chandler |
-| **Founded** | 2013 |
-| **Funding** | Self-funded |
-| **Employees** | 1-10 |
-| **Industry** | — |
-| **Category** | — |
-| **Leaders** | David Lee (CEO/Co-Founder), Bryce Christiansen (Growth Manager), Todd Stoker (VP Product) |
+- **Smoke** — the site is up, loads, and has no console errors
+- **Navigation** — nav links, routing, menus, breadcrumbs
+- **Forms** — field presence, validation, accessibility (never submitted)
+- **Functional** — business features: pricing, accordions, search, video, etc.
+- **Visual** — screenshot regression across breakpoints
+- **Responsive** — layout correctness at mobile/tablet/desktop
 
----
+## Tech Stack
 
-## 🧪 QA Agentic Solution
+- [Playwright](https://playwright.dev/) — browser automation and test runner
+- TypeScript (strict mode) — typed page objects, fixtures, and tests
+- Page Object Model — one class per page/section, no assertions inside page objects
+- GitHub Actions — CI (see [`.github/workflows/playwright.yml`](./.github/workflows/playwright.yml))
 
-This repository will contain a Playwright TypeScript test automation framework
-for **PlusThis**'s web application at http://www.plusthis.com/.
+## Getting Started
 
-### Planned Test Coverage
+### Prerequisites
 
-- [ ] Smoke tests
-- [ ] Functional tests
-- [ ] Regression suite
-- [ ] Accessibility checks
-- [ ] Performance baselines
+- Node.js 20 LTS or newer
+- Git
 
-### Tech Stack
-
-- [Playwright](https://playwright.dev/) — browser automation
-- TypeScript — strongly typed test code
-- GitHub Actions — CI/CD pipeline
-- AI-assisted test generation via GitHub Copilot
-
----
-
-## 🚀 Getting Started
+### Setup
 
 ```bash
 # Install dependencies
 npm install
 
-# Install Playwright browsers
-npx playwright install
+# Install Playwright browsers (one-time, or after a Playwright version bump)
+npx playwright install --with-deps
 
-# Run all tests
-npx playwright test
-
-# Run tests with UI
-npx playwright test --ui
+# Copy the env template and fill in values if you need to override the target URL
+cp .env.example .env
 ```
 
----
+`site.config.json` is the source of truth for which site is under test — you normally don't need `.env` unless you want to point at a staging URL via `SITE_URL`.
 
-## 📁 Project Structure
+### Running tests
 
-```
-plusthis_QA_Agentic_Solution/
-├── tests/
-│   ├── smoke/
-│   ├── functional/
-│   └── regression/
-├── pages/          # Page Object Models
-├── fixtures/       # Test data
-├── utils/          # Helpers
-├── playwright.config.ts
-├── package.json
-└── README.md
+```bash
+npm test                    # full suite, all projects (desktop/mobile/tablet)
+npm run test:smoke          # @smoke only
+npm run test:navigation     # @navigation only
+npm run test:forms          # @forms only
+npm run test:visual         # @visual only
+npm run test:responsive     # @responsive only
+npm run test:headed         # any of the above with a visible browser
+npm run report              # open the last HTML report
+npm run baseline            # regenerate visual snapshots (review before committing!)
 ```
 
----
+Before every `npm test`, a `pretest` hook checks that the target site is reachable and prints a warning (not a failure) if it isn't — see [`.claude/hooks/pre-test.sh`](./.claude/hooks/pre-test.sh).
 
-*Generated as part of the Phoenix Startup QA Agentic Solutions project.*
+### Quality gates
+
+```bash
+npm run typecheck           # tsc --noEmit — must be clean before finishing any task
+npm run lint                # eslint
+```
+
+## Project Structure
+
+```
+site.config.json          # site URL, name, and per-site flags (hasContactForm, skipVisual, ...)
+playwright.config.ts      # projects: desktop, mobile, tablet
+src/
+  pages/                  # Page Object Model classes, one per page/section
+  fixtures/site.fixture.ts  # custom test fixture exposing page objects + siteConfig
+  utils/                  # link-checker, visual-helper
+  types/                  # SiteConfig interface + loader
+tests/
+  smoke/  navigation/  forms/  functional/  visual/  responsive/
+.claude/                  # Claude Code config: agents, commands, hooks, settings
+.github/                  # GitHub-side config: CI workflow, PR template
+```
+
+## Contributing rules
+
+These are enforced by convention and reviewed in PRs (see [CLAUDE.md](./CLAUDE.md) for the full, authoritative list):
+
+- **Never submit a form, create an account, or log in** unless `auth.required: true` in `site.config.json`.
+- **No hardcoded URLs** in tests — always resolve through `baseURL` / `siteConfig`.
+- **No assertions inside page objects** — page objects expose actions, tests hold `expect()`.
+- **No `page.waitForTimeout()`** — use `waitForSelector` or Playwright's auto-waiting.
+- **Tag every test** with at least one of `@smoke @navigation @forms @functional @visual @responsive`.
+- Run `npm run typecheck` before opening a PR.
+
+## Docs map
+
+| File | Purpose |
+|------|---------|
+| [`CLAUDE.md`](./CLAUDE.md) | Authoritative instructions Claude Code loads every session: architecture rules, tagging reference, do-not list |
+| [`AGENTS.md`](./AGENTS.md) | Catalog of the custom subagents in `.claude/agents/` and how to add new ones |
+| [`SKILLS.md`](./SKILLS.md) | Catalog of the custom commands/skills in `.claude/commands/` (and `.claude/skills/` going forward) |
+| [`.github/README.md`](./.github/README.md) | What lives in `.github/` vs `.claude/`, and why |
